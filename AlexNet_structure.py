@@ -57,9 +57,13 @@ def bias_variable(shape):
 
 #Our defined functions:
 def conv2d_stride4(x, W):
-  return tf.nn.conv2d(x, W, strides=[1, 2, 2, 1], padding='Valid')
+  return tf.nn.conv2d(x, W, strides=[1, 4, 4, 1], padding='Valid')
 
+def conv2d_stride2(x, W):
+  return tf.nn.conv2d(x, W, strides=[1, 2, 2, 1], padding='SAME')
 
+def conv2d_stride1(x, W):
+  return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
 #Adding data feeder for computation graph
 with tf.name_scope('data_feeder'):
     inputs = tf.placeholder(tf.float32, [None, 32, 32, 3], 'inputs')
