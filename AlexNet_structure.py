@@ -5,9 +5,9 @@ import tensorflow as tf
 
 
 '''
-    1. The input data with the shape [batch, 32, 32, 3]
-    2. The first convolutional layer: 5x5 feature map size, 32 channels, same padding, stride [1, 1, 1, 1]
-    3. The first maxpooling (2x2 stride 2x2) layer: ksize [1, 2, 2, 1], stride [1, 2, 2, 1]
+    1. The input data with the shape [batch, 128, 128, 3]
+    2. The first convolutional layer: 8x8 feature map size, 25 channels, valid padding, stride [1, 1, 1, 1]
+    3. The first maxpooling (3x3 stride 2x2) layer: ksize [1, 3, 3, 1], stride [1, 2, 2, 1]
     4. Lrn layer
     5. The second convolutional layer: 5x5 feature map size, 64 channels, same padding, stride [1, 1, 1, 1]
     6. Lrn layer
@@ -60,41 +60,89 @@ def conv2d_stride4(x, W):
   return tf.nn.conv2d(x, W, strides=[1, 4, 4, 1], padding='Valid')
 
 def conv2d_stride2(x, W):
-  return tf.nn.conv2d(x, W, strides=[1, 2, 2, 1], padding='SAME')
+  return tf.nn.conv2d(x, W, strides=[1, 2, 2, 1], padding='Valid')
 
 def conv2d_stride1(x, W):
-  return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
+  return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='Valid')
+
+def max_pool_3x3(x):
+  return tf.nn.max_pool(x, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='Valid')
+
+
+
+
+
+
+
 #Adding data feeder for computation graph
 with tf.name_scope('data_feeder'):
-    inputs = tf.placeholder(tf.float32, [None, 32, 32, 3], 'inputs')
+    inputs = tf.placeholder(tf.float32, [None, 128, 128, 3], 'inputs')
     targets = tf.placeholder(tf.float32, [None, train_data_10.num_classes], 'targets')
 
+
+
+##1
 #Adding the first convolutional layer into the graph
 with tf.name_scope('Convolutional_layer_1'):
-    W_conv1 = weight_variable_normal([5, 5, 3, 32])
-    b_conv1 = bias_variable([32])
+    W_conv1 = weight_variable_normal([8, 8, 3, 15])
+    b_conv1 = bias_variable([15])
     conv_1 = tf.nn.relu(conv2d_stride1(inputs, W_conv1) + b_conv1)
 
-#Adding the first 2x2 max pooling layer into the graph
-with tf.name_scope('Max_pooling_2x2_layer_1'):
-    pool1 = max_pool_2x2(conv_1)
-#Adding the first local response normal layer into the graph
-with tf.name_scope('Local_response_normal_layer_1'):
-    lrn1 = tf.nn.local_response_normalization(pool1)
+#Adding the first 3x3 max pooling layer into the graph
+with tf.name_scope('Max_pooling_3x3_layer_1'):
+    pool1 = max_pool_3x3(conv_1)
 
+##2
 #Adding the second convolutional layer into the graph
 with tf.name_scope('Convolutional_layer_2'):
-    W_conv2 = weight_variable_normal([5, 5, 32, 64])
-    b_conv2 = bias_variable([64])
-    conv_2 = tf.nn.relu(conv2d_stride1(lrn1, W_conv2) + b_conv2)
+    W_conv2 = weight_variable_normal([4, 4, 15, 20])
+    b_conv2 = bias_variable([20])
+    conv_2 = tf.nn.relu(conv2d_stride1(conv_1, W_conv2) + b_conv2)
 
-#Adding the second local response normal layer into the graph
-with tf.name_scope('Local_response_normal_layer_2'):
-    lrn2 = tf.nn.local_response_normalization(conv_2)
+#Adding the second 3x3 max pooling layer into the graph
+with tf.name_scope('Max_pooling_3x3_layer_2'):
+    pool2 = max_pool_3x3(conv_2)
 
-#Adding the second 2x2 max pooling layer into the graph
-with tf.name_scope('Max_pooling_2x2_layer_2'):
-    pool2 = max_pool_2x2(lrn2)
+
+##3
+#Adding the thir convolutional layer into the graph
+with tf.name_scope('Convolutional_layer_3'):
+    W_conv3 = weight_variable_normal([4, 4, 20, 20])
+    b_conv3 = bias_variable([20])
+    conv_3 = tf.nn.relu(conv2d_stride1(conv_2, W_conv3) + b_conv3)
+
+#Adding the second 3x3 max pooling layer into the graph
+with tf.name_scope('Max_pooling_3x3_layer_2'):
+    pool3 = max_pool_3x3(conv_3)
+
+
+
+
+##4
+#Adding the fourth convolutional layer into the graph
+with tf.name_scope('Convolutional_layer_3'):
+    W_conv4 = weight_variable_normal([4, 4, 20, 20])
+    b_conv4 = bias_variable([20])
+    conv_4 = tf.nn.relu(conv2d_stride1(conv_3, W_conv4) + b_conv4)
+
+#Adding the second 3x3 max pooling layer into the graph
+with tf.name_scope('Max_pooling_3x3_layer_2'):
+    pool4 = max_pool_3x3(conv_4)
+
+
+
+##5
+#Adding the fifth convolutional layer into the graph
+with tf.name_scope('Convolutional_layer_3'):
+    W_conv5 = weight_variable_normal([4, 4, 20, 20])
+    b_conv5 = bias_variable([20])
+    conv_5 = tf.nn.relu(conv2d_stride1(conv_4, W_conv5) + b_conv5)
+
+#Adding the second 3x3 max pooling layer into the graph
+with tf.name_scope('Max_pooling_3x3_layer_2'):
+    pool5 = max_pool_3x3(conv_5)
+
+
 
 #Adding the first fully connected layer into the graph
 with tf.name_scope('Fully_connected_layer_1'):
